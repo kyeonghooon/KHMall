@@ -10,18 +10,19 @@ KHMall은 **상품 관리, 주문 처리, 재고·회원 관리를 지원하는 
 
 ## ⚙️ 주요 기능
 ### 1. 회원
-- 회원가입 / 로그인
-- 사용자 권한: 일반 회원 vs 관리자
-- (로그인 세션 유지·만료는 토큰 기반으로 처리)
+- 회원가입 / 로그인 (JWT 토큰 기반)
+- 사용자 권한: 일반 회원 · 관리자
 
 ### 2. 카테고리
-- 최대 5단계 상·하위 카테고리 생성 / 수정 / 삭제
+- 최대 5단계 상·하위 카테고리 CRUD
 - 카테고리별 상품 목록 조회
 
 ### 3. 상품
 - 상품 등록·수정·삭제 (관리자)
 - 상품 목록 / 상세 조회 (회원)
 - 재고와 연동되어 판매 상태 자동 반영
+> **상품 등록 시 입력 정보**<br>
+> 상품명(name), 가격(price), 설명(description), 이미지(image), 카테고리(category), 재고(stock)
 
 ### 4. 장바구니
 - 상품 담기, 수량 변경, 삭제
@@ -33,37 +34,25 @@ KHMall은 **상품 관리, 주문 처리, 재고·회원 관리를 지원하는 
 - 주문 내역 조회 및 결제 전 취소 요청
 
 ### 6. 검색
-- 키워드(상품명·카테고리) 기반 검색
-- 인기 검색어 TOP 10 제공 (Redis 캐시)
+- 키워드(상품명·카테고리) 기반 검색 (Elasticsearch 8)
+- 인기 검색어 TOP N 제공 (Redis)
 
 ### 7. 쿠폰·할인
 - 관리자 쿠폰 발급 (정액 / 정율)
-- 주문 시 쿠폰 적용 (주문당 1매, 중복 불가)
+- 주문 시 쿠폰 1매 적용 (중복 불가)
 - 쿠폰 사용·만료 이력 관리
 
 ### 8. 캐시
-- **로컬 캐시 (Caffeine)**
-    - 카테고리 트리 JSON
-        - TTL : 12 시간
-- **분산 캐시 (Redis 7)**
-    - 인기 검색어 Top N
-        - 키 : `search:hot` (ZSET)
-        - TTL : 24 시간
-    - 상품 **상세** 캐시
-        - 키 : `product:{id}`
-        - TTL : 10 분
-        - 가격·재고 변경 시 무효화
-    - 상품 **목록** 캐시
-        - 키 형식 : `products:{catId}:{sort}:{page}`
-          - `catId` = 카테고리 ID
-          - `sort` = `latest` \| `priceAsc` \| `priceDesc`
-          - `page` = 1 – 5
-        - TTL : 5 분
-        - 적용 카테고리 기준
-          - 최근 24 시간 주문 수 상위 5개 카테고리만 캐싱
-          - 집계 방법
-              1. 5 분마다 스케줄러가 SQL로 주문 수 집계 ⇢ `category:hot` 키에 저장
-              2. 목록 요청 시 `catId` 가 `category:hot` 안에 있으면 캐시 저장 / 조회
+#### 로컬 캐시 (Caffeine)
+- **카테고리 트리 JSON** : `category:tree` · TTL 12 h
+
+#### 분산 캐시 (Redis 7)
+| 영역 | 키 예시 | TTL | 비고 |
+|------|--------|-----|------|
+| **인기 검색어 – Per-term ZSET** | `search:{term}` | 25 h | `ZADD score=timestamp member=timestamp[:seq]` → `ZREMRANGEBYSCORE now-24h` <br> `ZCARD` = 최근 24 h 검색 횟수 |
+| **인기 검색어 – 전역 랭킹 ZSET** | `search:hot` | 24 h | `ZADD score=cnt member=term` → `ZREVRANGE ...` 로 TOP N |
+| **상품 상세** | `product:{id}` | 10 m | 가격·재고 변경 시 즉시 무효화 |
+| **상품 목록** | `products:{catId}:{sort}:{page}` | 5 m | 모든 카테고리에 동일 전략 적용 |
 ### 9. 결제 (가결제)
 - 내부 **가결제 테이블**로 승인·취소 관리
 - **PG 연동 시 ERD 수정·컬럼 확장 예정**
@@ -80,17 +69,16 @@ KHMall은 **상품 관리, 주문 처리, 재고·회원 관리를 지원하는 
 ---
 ## 🛠️ 기술 스택
 
-| 영역 | 사용 기술                                             | 용도                   |
-|------|---------------------------------------------------|----------------------|
-| **Language** | Java 21                                         | 백엔드 핵심 언어            |
-| **Framework** | Spring Boot 3.5.4<br>Spring Data JPA<br>Spring Security | REST API, ORM, 인증·권한 |
-| **Database** | MySQL 8                                           | 영속 데이터 저장            |
-| **Cache** | Caffeine (Spring Cache)<br>Redis 7 | 카테고리 트리 로컬 캐싱, 인기 검색어 캐싱      |
-| **Search** | Elasticsearch 8                                   | 상품 검색·필터링            |
-| **Build** | Gradle 8                                          | 의존성 관리·빌드            |
-| **Testing** | JUnit 5                                           | 단위·통합 테스트            |
-| **Code Utils** | Lombok                                            | 보일러플레이트 제거           |
-| **API Docs** | SpringDoc OpenAPI 3 + Swagger-UI                  | 실시간 API 문서           |
+| 영역 | 사용 기술 | 용도 |
+|------|-----------|------|
+| Language | Java 21 | 백엔드 핵심 언어 |
+| Framework | Spring Boot 3.5.4 / Spring Data JPA / Spring Security | REST API · ORM · 인증 |
+| Database | MySQL 8 | 영속 데이터 저장 |
+| Cache | Caffeine / Redis 7 | 로컬·분산 캐시 |
+| Search | Elasticsearch 8 | 상품 검색 |
+| Build | Gradle 8 | 빌드·의존성 관리 |
+| Testing | JUnit 5 | 단위·통합 테스트 |
+| Docs | SpringDoc OpenAPI 3 + Swagger-UI | 실시간 API 문서 생성 |
 
 ---
 ## ❓ Troubleshooting
