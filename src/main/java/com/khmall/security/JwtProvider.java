@@ -1,5 +1,6 @@
 package com.khmall.security;
 
+import com.khmall.common.constants.AuthConstants;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
@@ -22,9 +23,7 @@ public class JwtProvider {
   // JWT 토큰 생성
   public String createToken(String username, String role) {
     Date now = new Date();
-    // 24시간
-    long validityInMs = 1000 * 60 * 60 * 24L;
-    Date validity = new Date(now.getTime() + validityInMs);
+    Date validity = new Date(now.getTime() + AuthConstants.TOKEN_EXPIRATION_TIME);
 
     return Jwts.builder()
         .subject(username)
