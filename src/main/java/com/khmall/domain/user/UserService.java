@@ -3,6 +3,9 @@ package com.khmall.domain.user;
 import com.khmall.domain.user.dto.LoginRequest;
 import com.khmall.domain.user.dto.SignupRequest;
 import com.khmall.domain.user.dto.UserResponse;
+import com.khmall.exception.custom.DuplicateException;
+import com.khmall.exception.custom.NotFoundException;
+import com.khmall.exception.custom.UnauthenticatedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,12 +23,12 @@ public class UserService {
    *
    * @param request 회원 가입 요청 정보
    * @return 가입된 사용자 정보
-   * @throws IllegalArgumentException 이미 사용 중인 아이디일 경우
+   * @throws DuplicateException 이미 사용 중인 아이디일 경우
    */
   @Transactional
   public UserResponse signup(SignupRequest request) {
     if (userRepository.existsByUsername(request.username())) {
-      throw new IllegalArgumentException("이미 사용 중인 아이디입니다.");
+      throw new DuplicateException("이미 사용 중인 아이디입니다.");
     }
     String encodedPassword = passwordEncoder.encode(request.password());
     User user = UserMapper.toEntity(request, encodedPassword);
@@ -38,14 +41,15 @@ public class UserService {
    *
    * @param request 로그인 요청 정보
    * @return 로그인된 사용자 정보
-   * @throws IllegalArgumentException 아이디가 존재하지 않거나 비밀번호가 일치하지 않을 경우
+   * @throws NotFoundException 사용자 정보가 존재하지 않을 경우
+   * @throws UnauthenticatedException 비밀번호가 일치하지 않을 경우
    */
   public UserResponse login(LoginRequest request) {
     User user = userRepository.findByUsername(request.username())
-        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+        .orElseThrow(() -> new NotFoundException("존재하지 않는 사용자입니다."));
 
     if (!passwordEncoder.matches(request.password(), user.getPassword())) {
-      throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+      throw new UnauthenticatedException("비밀번호가 일치하지 않습니다.");
     }
 
     return UserMapper.toResponse(user);
