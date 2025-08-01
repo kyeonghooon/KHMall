@@ -36,7 +36,7 @@ public class AuthController {
   public ResponseEntity<TokenResponse> login(@Valid @RequestBody LoginRequest req) {
     UserResponse user = userService.login(req);
     logger.debug("User logged in: {}", user.username());
-    String token = jwtProvider.createToken(user.username(), user.role().name());
+    String token = jwtProvider.createToken(user);
     return ResponseEntity.ok(new TokenResponse(token));
   }
 }

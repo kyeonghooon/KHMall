@@ -6,6 +6,9 @@ import com.khmall.domain.user.UserService;
 import com.khmall.domain.user.dto.LoginRequest;
 import com.khmall.domain.user.dto.SignupRequest;
 import com.khmall.domain.user.dto.UserResponse;
+import com.khmall.exception.custom.DuplicateException;
+import com.khmall.exception.custom.NotFoundException;
+import com.khmall.exception.custom.UnauthenticatedException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -60,7 +63,7 @@ class UserServiceTest {
 
     // When & Then: 같은 아이디로 다시 가입 시도 → 예외 발생
     SignupRequest req = new SignupRequest("dup", "pw", "b");
-    assertThrows(IllegalArgumentException.class, () ->
+    assertThrows(DuplicateException.class, () ->
         userService.signup(req)
     );
   }
@@ -72,7 +75,18 @@ class UserServiceTest {
 
     // When & Then: 잘못된 비밀번호로 로그인 시도 → 예외 발생
     LoginRequest req = new LoginRequest("pwtest", "wrongpw");
-    assertThrows(IllegalArgumentException.class, () ->
+    assertThrows(UnauthenticatedException.class, () ->
+        userService.login(req)
+    );
+  }
+
+  @Test
+  void 유저_조회_실패_에러() {
+    // Given: 아무것도 없는 상태 (가입 X)
+
+    // When & Then: 없는 아이디로 로그인 시도 → 예외 발생
+    LoginRequest req = new LoginRequest("not_exist_user", "any_pw");
+    assertThrows(NotFoundException.class, () ->
         userService.login(req)
     );
   }
