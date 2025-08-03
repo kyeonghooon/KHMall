@@ -32,8 +32,13 @@ public class SecurityConfig {
 
         // URL 인증/인가 설정
         .authorizeHttpRequests(auth -> auth
-            // /api/auth/** 경로(회원가입, 로그인)는 인증 없이 접근 허용
-            .requestMatchers("/api/auth/**").permitAll()
+            .requestMatchers(
+                // /api/auth/** 경로(회원가입, 로그인)는 인증 없이 접근 허용
+                "/api/auth/**",
+                // Swagger 관련 경로 인증 없이 접근 허용
+                "/v3/api-docs/**",
+                "/swagger-ui/**"
+            ).permitAll()
             // 나머지 모든 요청은 인증 필요(JWT 없으면 401)
             .anyRequest().authenticated())
 
