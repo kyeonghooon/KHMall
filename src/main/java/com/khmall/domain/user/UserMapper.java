@@ -2,7 +2,10 @@ package com.khmall.domain.user;
 
 import com.khmall.domain.user.dto.SignupRequest;
 import com.khmall.domain.user.dto.UserResponse;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class UserMapper {
 
   public static UserResponse toResponse(User user) {
