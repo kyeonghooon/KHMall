@@ -1,5 +1,7 @@
 package com.khmall.user;
 
+import com.khmall.domain.user.Role;
+import com.khmall.domain.user.dto.UserResponse;
 import com.khmall.security.JwtProvider;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -16,10 +18,11 @@ public class JwtProviderTest {
   void 토큰_정상생성_파싱_성공() {
     // Given
     String username = "tester";
-    String role = "ADMIN";
+    Role role = Role.ADMIN;
+    UserResponse user = new UserResponse(1L, username, "Test User", role);
 
     // When
-    String token = jwtProvider.createToken(username, role);
+    String token = jwtProvider.createToken(user);
 
     // Then
     assertTrue(jwtProvider.validateToken(token));
@@ -33,8 +36,9 @@ public class JwtProviderTest {
     String secretB = "differentdifferentdifferentdifferent9876";
     JwtProvider jwtProviderA = new JwtProvider(secret);
     JwtProvider jwtProviderB = new JwtProvider(secretB);
+    UserResponse user = new UserResponse(1L, "tester", "Test User", Role.ADMIN);
 
-    String token = jwtProviderA.createToken("tester", "ADMIN");
+    String token = jwtProviderA.createToken(user);
 
     // When & Then
     assertFalse(jwtProviderB.validateToken(token));
