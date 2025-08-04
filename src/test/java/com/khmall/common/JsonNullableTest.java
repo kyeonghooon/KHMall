@@ -1,6 +1,7 @@
 package com.khmall.common;
 
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.openapitools.jackson.nullable.JsonNullable;
@@ -32,6 +33,15 @@ class JsonNullableTest {
   }
 
   @Test
+  void Optional_필드값_null_비교용_테스트() {
+    Optional<String> optional = Optional.ofNullable(null);
+    optional.ifPresent(value -> {
+      fail("This should not be called, as the value is null.");
+    });
+    assertFalse(optional.isPresent());
+  }
+
+  @Test
   void 필드값_생략_테스트() {
     JsonNullable<String> jsonNullable = JsonNullable.undefined();
     jsonNullable.ifPresent(value -> {
@@ -41,4 +51,5 @@ class JsonNullableTest {
     assertFalse(jsonNullable.isPresent());
     assertThrows(NoSuchElementException.class, jsonNullable::get);
   }
+
 }

@@ -3,7 +3,7 @@ package com.khmall.support;
 import com.khmall.domain.user.User;
 import com.khmall.domain.user.UserRepository;
 import com.khmall.security.CustomUserDetails;
-import com.khmall.utill.TestEntityFactory;
+import com.khmall.util.TestEntityFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;

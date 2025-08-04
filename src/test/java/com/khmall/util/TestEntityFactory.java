@@ -1,4 +1,4 @@
-package com.khmall.utill;
+package com.khmall.util;
 
 import com.khmall.domain.user.Role;
 import com.khmall.domain.user.User;
