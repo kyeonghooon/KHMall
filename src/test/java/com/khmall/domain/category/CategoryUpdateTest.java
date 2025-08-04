@@ -1,26 +1,20 @@
-package com.khmall.category;
+package com.khmall.domain.category;
 
-import com.khmall.AuthenticatedServiceTestBase;
-import com.khmall.domain.category.CategoryRepository;
-import com.khmall.domain.category.CategoryService;
+import static com.khmall.common.constants.CategoryConstants.CATEGORY_NAME_DUPLICATE;
+import static com.khmall.common.constants.CategoryConstants.CATEGORY_NOT_FOUND;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import com.khmall.domain.category.dto.CategoryCreateRequest;
 import com.khmall.domain.category.dto.CategoryResponse;
 import com.khmall.domain.category.dto.CategoryUpdateRequest;
 import com.khmall.exception.custom.DuplicateException;
-import java.util.UUID;
+import com.khmall.support.AuthenticatedServiceTestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openapitools.jackson.nullable.JsonNullable;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
 
-import static com.khmall.common.constants.CategoryConstants.CATEGORY_NAME_DUPLICATE;
-import static com.khmall.common.constants.CategoryConstants.CATEGORY_NOT_FOUND;
-import static org.assertj.core.api.Assertions.*;
-
-@SpringBootTest
-@Transactional
 class CategoryUpdateTest extends AuthenticatedServiceTestBase {
 
   @Autowired

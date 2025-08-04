@@ -1,24 +1,19 @@
-package com.khmall.user;
+package com.khmall.domain.user;
 
-import com.khmall.domain.user.Role;
-import com.khmall.domain.user.UserRepository;
-import com.khmall.domain.user.UserService;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import com.khmall.domain.user.dto.LoginRequest;
 import com.khmall.domain.user.dto.SignupRequest;
 import com.khmall.domain.user.dto.UserResponse;
 import com.khmall.exception.custom.DuplicateException;
 import com.khmall.exception.custom.NotFoundException;
 import com.khmall.exception.custom.UnauthenticatedException;
+import com.khmall.support.TestBase;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-@SpringBootTest
-@Transactional
-class UserServiceTest {
+class UserServiceTest extends TestBase {
 
   @Autowired
   UserService userService;

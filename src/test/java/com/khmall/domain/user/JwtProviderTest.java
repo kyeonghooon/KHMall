@@ -1,16 +1,20 @@
-package com.khmall.user;
+package com.khmall.domain.user;
 
-import com.khmall.domain.user.Role;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.khmall.domain.user.dto.UserResponse;
 import com.khmall.security.JwtProvider;
+import com.khmall.support.TestBase;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
-public class JwtProviderTest {
+class JwtProviderTest extends TestBase {
   private final String secret = "testtesttesttesttesttesttesttest1234";
   private final JwtProvider jwtProvider = new JwtProvider(secret);
 
