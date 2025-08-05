@@ -29,8 +29,7 @@ public class CategoryValidator {
 
   // 이름 중복 검증
   public void validateDuplicateName(Category parent, String name) {
-    boolean exists = categoryRepository.existsByParentAndName(parent, name);
-    if (exists) {
+    if (categoryRepository.existsByParentAndName(parent, name)) {
       throw new DuplicateException(NAME_DUPLICATE);
     }
   }

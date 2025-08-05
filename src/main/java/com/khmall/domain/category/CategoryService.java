@@ -74,7 +74,7 @@ public class CategoryService {
     Integer prevSortOrder = category.getSortOrder();
 
     updateCategoryName(category, request);
-    updateParentCategory(category, request, id);
+    updateParentCategory(category, request);
     updateSortOrder(category, request);
 
     logCategoryChange(id, prevName, category.getName(), prevParentId,
@@ -85,14 +85,16 @@ public class CategoryService {
   }
 
   private void updateCategoryName(Category category, CategoryUpdateRequest request) {
-    request.name().ifPresent(name -> {
-      validateName(name);
-      // 상위 카테고리를 변경 하지 않을 경우 중복 확인
-      if (!request.parentId().isPresent()) {
-        categoryValidator.validateDuplicateName(category.getParent(), name);
-      }
-      category.setName(name);
-    });
+    if (!request.name().isPresent()) {
+      return; // 이름 변경이 없는 경우
+    }
+    String name = request.name().get();
+    validateName(name);
+    // 상위 카테고리를 변경 하지 않을 경우 중복 확인
+    if (!request.parentId().isPresent()) {
+      categoryValidator.validateDuplicateName(category.getParent(), name);
+    }
+    category.setName(name);
   }
 
   private void validateName(String name) {
@@ -104,38 +106,42 @@ public class CategoryService {
     }
   }
 
-  private void updateParentCategory(Category category, CategoryUpdateRequest request, Long id) {
-    request.parentId().ifPresent(parentId -> {
-      // 부모 카테고리 ID가 null인 경우 최상단 카테고리로 설정
-      if (parentId == null) {
-        // 최상단 카테고리에 동일 이름 있는지 확인
-        categoryValidator.validateDuplicateName(null, category.getName());
-        category.setParent(null);
-      }
-      // 자기 참조 방지
-      else if (parentId.equals(id)) {
-        throw new BadRequestException(CategoryConstants.SELF_REFERENCE_MESSAGE);
-      }
-      // 상위 카테고리를 변경 하려는 경우
-      else {
-        Category parent = categoryRepository.findById(parentId)
-            .orElseThrow(() -> new NotFoundException(CategoryConstants.PARENT_NOT_FOUND));
-        // 카테고리 최대 깊이 체크
-        categoryValidator.validateDepth(parent);
-        // 상위 카테고리와 이름으로 카테고리 존재 여부 확인
-        categoryValidator.validateDuplicateName(parent, category.getName());
-        category.setParent(parent);
-      }
-    });
+  private void updateParentCategory(Category category, CategoryUpdateRequest request) {
+    if (!request.parentId().isPresent()) {
+      return; // 부모 카테고리 변경이 없는 경우
+    }
+    Long parentId = request.parentId().get();
+    // 부모 카테고리 ID가 null인 경우 최상단 카테고리로 설정
+    if (parentId == null) {
+      // 최상단 카테고리에 동일 이름 있는지 확인
+      categoryValidator.validateDuplicateName(null, category.getName());
+      category.setParent(null);
+    }
+    // 자기 참조 방지
+    else if (parentId.equals(category.getCategoryId())) {
+      throw new BadRequestException(CategoryConstants.SELF_REFERENCE_MESSAGE);
+    }
+    // 상위 카테고리를 변경 하려는 경우
+    else {
+      Category parent = categoryRepository.findById(parentId)
+          .orElseThrow(() -> new NotFoundException(CategoryConstants.PARENT_NOT_FOUND));
+      // 카테고리 최대 깊이 체크
+      categoryValidator.validateDepth(parent);
+      // 상위 카테고리와 이름으로 카테고리 존재 여부 확인
+      categoryValidator.validateDuplicateName(parent, category.getName());
+      category.setParent(parent);
+    }
   }
 
   private void updateSortOrder(Category category, CategoryUpdateRequest request) {
-    request.sortOrder().ifPresent(sortOrder -> {
-      if (sortOrder == null || sortOrder < 0) {
-        throw new BadRequestException(CategoryConstants.SORT_ORDER_MIN_MESSAGE);
-      }
-      category.setSortOrder(sortOrder);
-    });
+    if (!request.sortOrder().isPresent()) {
+      return; // 정렬 순서 변경이 없는 경우
+    }
+    Integer sortOrder = request.sortOrder().get();
+    if (sortOrder == null || sortOrder < 0) {
+      throw new BadRequestException(CategoryConstants.SORT_ORDER_MIN_MESSAGE);
+    }
+    category.setSortOrder(sortOrder);
   }
 
   private void logCategoryChange(Long id, String prevName, String newName,
