@@ -45,6 +45,9 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
+    // json binding
+    implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
+
     // Development and Testing
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

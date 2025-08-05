@@ -1,18 +1,18 @@
-package com.khmall.user;
-
-import com.khmall.domain.user.dto.SignupRequest;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-import jakarta.validation.ValidatorFactory;
-import jakarta.validation.ConstraintViolation;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
-import java.util.Set;
+package com.khmall.domain.user;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class SignupRequestTest {
+import com.khmall.domain.user.dto.SignupRequest;
+import com.khmall.support.TestBase;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
+import java.util.Set;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+class SignupRequestTest extends TestBase {
 
   static Validator validator;
 

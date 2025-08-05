@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <!-- ============================= -->
+  <!--   1. 일반 로그(콘솔/파일) 설정   -->
+  <!-- ============================= -->
+  <property name="CONSOLE_PATTERN"
+    value="%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n"/>
+  <property name="FILE_PATTERN"
+    value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %logger{36} - %msg%n"/>
+
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>${CONSOLE_PATTERN}</pattern>
+    </encoder>
+  </appender>
+
+  <appender name="APP_FILE" class="ch.qos.logback.core.FileAppender">
+    <file>logs/test_app.log</file>
+    <encoder>
+      <pattern>${FILE_PATTERN}</pattern>
+    </encoder>
+  </appender>
+
+  <!-- 모든 일반 로그: 콘솔+파일에 기록 -->
+  <root level="INFO">
+    <appender-ref ref="STDOUT"/>
+    <appender-ref ref="APP_FILE"/>
+  </root>
+
+  <!-- =================================== -->
+  <!--   2. 변경 이력(감사) 로그 전용 설정   -->
+  <!-- =================================== -->
+  <property name="CATEGORY_AUDIT_PATTERN"
+    value="%d{yyyy-MM-dd HH:mm:ss.SSS} [userId=%X{userId} categoryId=%X{categoryId}] %msg%n"/>
+
+  <appender name="CATEGORY_AUDIT" class="ch.qos.logback.core.FileAppender">
+    <file>logs/test_category_audit.log</file>
+    <encoder>
+      <pattern>${CATEGORY_AUDIT_PATTERN}</pattern>
+    </encoder>
+  </appender>
+
+  <!-- 카테고리 변경 이력 전용 Logger (root와 완전히 분리) -->
+  <logger name="com.khmall.log.audit.CategoryLogger" level="INFO" additivity="false">
+    <appender-ref ref="CATEGORY_AUDIT"/>
+  </logger>
+
+</configuration>

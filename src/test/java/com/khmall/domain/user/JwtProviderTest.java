@@ -1,14 +1,20 @@
-package com.khmall.user;
+package com.khmall.domain.user;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import com.khmall.domain.user.dto.UserResponse;
 import com.khmall.security.JwtProvider;
+import com.khmall.support.TestBase;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
-public class JwtProviderTest {
+class JwtProviderTest extends TestBase {
   private final String secret = "testtesttesttesttesttesttesttest1234";
   private final JwtProvider jwtProvider = new JwtProvider(secret);
 
@@ -16,10 +22,11 @@ public class JwtProviderTest {
   void 토큰_정상생성_파싱_성공() {
     // Given
     String username = "tester";
-    String role = "ADMIN";
+    Role role = Role.ADMIN;
+    UserResponse user = new UserResponse(1L, username, "Test User", role);
 
     // When
-    String token = jwtProvider.createToken(username, role);
+    String token = jwtProvider.createToken(user);
 
     // Then
     assertTrue(jwtProvider.validateToken(token));
@@ -33,8 +40,9 @@ public class JwtProviderTest {
     String secretB = "differentdifferentdifferentdifferent9876";
     JwtProvider jwtProviderA = new JwtProvider(secret);
     JwtProvider jwtProviderB = new JwtProvider(secretB);
+    UserResponse user = new UserResponse(1L, "tester", "Test User", Role.ADMIN);
 
-    String token = jwtProviderA.createToken("tester", "ADMIN");
+    String token = jwtProviderA.createToken(user);
 
     // When & Then
     assertFalse(jwtProviderB.validateToken(token));
