@@ -1,7 +1,7 @@
 package com.khmall.domain.category;
 
-import static com.khmall.common.constants.CategoryConstants.CATEGORY_NAME_DUPLICATE;
-import static com.khmall.common.constants.CategoryConstants.CATEGORY_NOT_FOUND;
+import static com.khmall.common.constants.CategoryConstants.NAME_DUPLICATE;
+import static com.khmall.common.constants.CategoryConstants.PARENT_NOT_FOUND;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -86,7 +86,7 @@ class CategoryUpdateTest extends AuthenticatedServiceTestBase {
     // when & then
     assertThatThrownBy(() -> categoryService.updateCategory(childCategory.categoryId(), request))
         .isInstanceOf(DuplicateException.class)
-        .hasMessageContaining(CATEGORY_NAME_DUPLICATE);
+        .hasMessageContaining(NAME_DUPLICATE);
   }
 
   @Test
@@ -102,7 +102,28 @@ class CategoryUpdateTest extends AuthenticatedServiceTestBase {
     // when & then
     assertThatThrownBy(() -> categoryService.updateCategory(childCategory.categoryId(), request))
         .isInstanceOf(com.khmall.exception.custom.NotFoundException.class)
-        .hasMessageContaining(CATEGORY_NOT_FOUND);
+        .hasMessageContaining(PARENT_NOT_FOUND);
+  }
+
+  @Test
+  void 카테고리이동_이름중복_테스트() {
+    // 이동하려는 상위 카테고리 아래에 같은 이름의 카테고리가 있는지 확인하는 테스트
+    // given
+    String newCategoryName = childCategory.name();
+    CategoryCreateRequest newChildRequest = new CategoryCreateRequest(
+        null, newCategoryName, 30);
+    CategoryResponse newChildCategory = categoryService.createCategory(newChildRequest);
+
+    CategoryUpdateRequest request = new CategoryUpdateRequest(
+        JsonNullable.undefined(),
+        JsonNullable.of(parentCategory.categoryId()),
+        JsonNullable.undefined()
+    );
+
+    // when & then
+    assertThatThrownBy(() -> categoryService.updateCategory(newChildCategory.categoryId(), request))
+        .isInstanceOf(DuplicateException.class)
+        .hasMessageContaining(NAME_DUPLICATE);
   }
 
 }
