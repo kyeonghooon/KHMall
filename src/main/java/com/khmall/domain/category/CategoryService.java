@@ -5,11 +5,16 @@ import com.khmall.common.constants.CategoryConstants;
 import com.khmall.domain.category.dto.CategoryCreateRequest;
 import com.khmall.domain.category.dto.CategoryDeleteResult;
 import com.khmall.domain.category.dto.CategoryResponse;
+import com.khmall.domain.category.dto.CategoryTreeResponse;
 import com.khmall.domain.category.dto.CategoryUpdateRequest;
 import com.khmall.exception.custom.BadRequestException;
 import com.khmall.exception.custom.DuplicateException;
 import com.khmall.exception.custom.NotFoundException;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -69,22 +74,21 @@ public class CategoryService {
     Category category = categoryRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(CategoryConstants.NOT_FOUND));
 
-    // 변경 전 값 백업
-    String prevName = category.getName();
-    Long prevParentId = category.getParent() == null ? null : category.getParent().getCategoryId();
-    Integer prevSortOrder = category.getSortOrder();
-
     updateCategoryName(category, request);
     updateParentCategory(category, request);
     updateSortOrder(category, request);
 
-    logCategoryChange(id, prevName, category.getName(), prevParentId,
-        category.getParent() == null ? null : category.getParent().getCategoryId(),
-        prevSortOrder, category.getSortOrder());
-
     return CategoryMapper.toResponse(category);
   }
 
+  /**
+   * 카테고리를 삭제합니다.
+   *
+   * @param id 삭제할 카테고리 ID
+   * @return 삭제된 카테고리 정보
+   * @throws NotFoundException    카테고리가 존재하지 않을 경우
+   * @throws BadRequestException 하위 카테고리가 존재하는 경우
+   */
   @Transactional
   public CategoryDeleteResult deleteCategory(Long id) {
     Category category = categoryRepository.findById(id)
@@ -104,6 +108,68 @@ public class CategoryService {
         category.getCategoryId(),
         category.getName()
     );
+  }
+
+  /**
+   * 카테고리 트리를 조회합니다.
+   *
+   * @return 카테고리 트리 구조
+   */
+  public List<CategoryTreeResponse> getCategoryTree() {
+    List<Category> categories = categoryRepository.findAll();
+
+    // id -> DTO 매핑
+    Map<Long, CategoryTreeResponse> dtoMap = categories.stream()
+        .collect(Collectors.toMap(
+            Category::getCategoryId,
+            CategoryMapper::toTreeResponse
+        ));
+
+    // tree 구조로 변환
+    categories.forEach(category -> {
+      if (category.getParent() != null) {
+        Long parentId = category.getParent().getCategoryId();
+        CategoryTreeResponse parentDto = dtoMap.get(parentId);
+        if (parentDto != null) {
+          parentDto.children().add(dtoMap.get(category.getCategoryId()));
+        }
+      }
+    });
+
+    // 최상위 카테고리만 추출
+    List<CategoryTreeResponse> roots = categories.stream()
+        .filter(c -> c.getParent() == null)
+        .map(c -> dtoMap.get(c.getCategoryId()))
+        .collect(Collectors.toList());
+
+    // 자식 카테고리 정렬
+    sortChildrenRecursively(roots);
+
+    return roots;
+  }
+
+  /**
+   * 카테고리 정보를 조회합니다.
+   *
+   * @param id 카테고리 ID
+   * @return 카테고리 정보
+   * @throws NotFoundException 카테고리가 존재하지 않을 경우
+   */
+  public CategoryResponse getCategory(Long id) {
+    Category category = categoryRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException(CategoryConstants.NOT_FOUND));
+    return CategoryMapper.toResponse(category);
+  }
+
+  /**
+   * 모든 카테고리의 평면 리스트를 조회합니다.
+   *
+   * @return 카테고리 리스트
+   */
+  public List<CategoryResponse> getCategoryFlatList() {
+    return categoryRepository.findAll().stream()
+        .map(CategoryMapper::toResponse)
+        .toList();
   }
 
   private void updateCategoryName(Category category, CategoryUpdateRequest request) {
@@ -166,17 +232,9 @@ public class CategoryService {
     category.setSortOrder(sortOrder);
   }
 
-  private void logCategoryChange(Long id, String prevName, String newName,
-      Long prevParentId, Long newParentId,
-      Integer prevSortOrder, Integer newSortOrder) {
-    if (!Objects.equals(prevName, newName)) {
-      log.info("[카테고리수정][ID={}] name: '{}' → '{}'", id, prevName, newName);
-    }
-    if (!Objects.equals(prevParentId, newParentId)) {
-      log.info("[카테고리수정][ID={}] parentId: {} → {}", id, prevParentId, newParentId);
-    }
-    if (!Objects.equals(prevSortOrder, newSortOrder)) {
-      log.info("[카테고리수정][ID={}] sortOrder: {} → {}", id, prevSortOrder, newSortOrder);
-    }
+  private void sortChildrenRecursively(List<CategoryTreeResponse> list) {
+    if (list == null) return;
+    list.sort(Comparator.comparing(CategoryTreeResponse::sortOrder).reversed());
+    list.forEach(node -> sortChildrenRecursively(node.children()));
   }
 }
