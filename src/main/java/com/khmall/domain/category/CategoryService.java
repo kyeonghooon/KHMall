@@ -3,6 +3,7 @@ package com.khmall.domain.category;
 
 import com.khmall.common.constants.CategoryConstants;
 import com.khmall.domain.category.dto.CategoryCreateRequest;
+import com.khmall.domain.category.dto.CategoryDeleteResult;
 import com.khmall.domain.category.dto.CategoryResponse;
 import com.khmall.domain.category.dto.CategoryUpdateRequest;
 import com.khmall.exception.custom.BadRequestException;
@@ -82,6 +83,27 @@ public class CategoryService {
         prevSortOrder, category.getSortOrder());
 
     return CategoryMapper.toResponse(category);
+  }
+
+  @Transactional
+  public CategoryDeleteResult deleteCategory(Long id) {
+    Category category = categoryRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException(CategoryConstants.NOT_FOUND));
+
+    // 하위 카테고리 존재 검사
+    if (categoryRepository.existsByParent_CategoryId(id)) {
+      throw new BadRequestException(CategoryConstants.CHILDREN_EXIST);
+    }
+
+    // TODO 연결된 상품 존재 검사
+
+    categoryRepository.deleteById(id);
+
+    // 로그용 리턴값
+    return new CategoryDeleteResult(
+        category.getCategoryId(),
+        category.getName()
+    );
   }
 
   private void updateCategoryName(Category category, CategoryUpdateRequest request) {
