@@ -7,6 +7,7 @@ import com.khmall.common.constants.CategoryConstants;
 import com.khmall.common.constants.CommonConstants;
 import com.khmall.domain.category.dto.CategoryDeleteResult;
 import com.khmall.exception.BusinessException;
+import com.khmall.exception.custom.ConflictException;
 import com.khmall.exception.custom.NotFoundException;
 import com.khmall.support.AuthenticatedServiceTestBase;
 import org.junit.jupiter.api.BeforeEach;
@@ -69,7 +70,7 @@ class CategoryDeleteTest extends AuthenticatedServiceTestBase {
 
     // when + then
     assertThatThrownBy(() -> categoryService.deleteCategory(category.getCategoryId()))
-        .isInstanceOf(BusinessException.class)
+        .isInstanceOf(ConflictException.class)
         .hasMessageContaining(CategoryConstants.CHILDREN_EXIST);
   }
 }

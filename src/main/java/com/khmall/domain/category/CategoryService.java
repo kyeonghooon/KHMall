@@ -8,6 +8,7 @@ import com.khmall.domain.category.dto.CategoryResponse;
 import com.khmall.domain.category.dto.CategoryTreeResponse;
 import com.khmall.domain.category.dto.CategoryUpdateRequest;
 import com.khmall.exception.custom.BadRequestException;
+import com.khmall.exception.custom.ConflictException;
 import com.khmall.exception.custom.DuplicateException;
 import com.khmall.exception.custom.NotFoundException;
 import java.util.Comparator;
@@ -96,7 +97,7 @@ public class CategoryService {
 
     // 하위 카테고리 존재 검사
     if (categoryRepository.existsByParent_CategoryId(id)) {
-      throw new BadRequestException(CategoryConstants.CHILDREN_EXIST);
+      throw new ConflictException(CategoryConstants.CHILDREN_EXIST);
     }
 
     // TODO 연결된 상품 존재 검사
@@ -140,7 +141,7 @@ public class CategoryService {
     List<CategoryTreeResponse> roots = categories.stream()
         .filter(c -> c.getParent() == null)
         .map(c -> dtoMap.get(c.getCategoryId()))
-        .collect(Collectors.toList());
+        .toList();
 
     // 자식 카테고리 정렬
     sortChildrenRecursively(roots);
