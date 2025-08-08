@@ -28,7 +28,8 @@ public class Category extends BaseAuditEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long categoryId;
+  @Column(name = "category_id")
+  private Long id;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "parent_id")

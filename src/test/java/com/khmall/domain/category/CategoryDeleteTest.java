@@ -6,7 +6,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.khmall.common.constants.CategoryConstants;
 import com.khmall.common.constants.CommonConstants;
 import com.khmall.domain.category.dto.CategoryDeleteResult;
-import com.khmall.exception.BusinessException;
 import com.khmall.exception.custom.ConflictException;
 import com.khmall.exception.custom.NotFoundException;
 import com.khmall.support.AuthenticatedServiceTestBase;
@@ -38,15 +37,15 @@ class CategoryDeleteTest extends AuthenticatedServiceTestBase {
   @Test
   void 정상_삭제_성공() {
     // when
-    CategoryDeleteResult result = categoryService.deleteCategory(category.getCategoryId());
+    CategoryDeleteResult result = categoryService.deleteCategory(category.getId());
 
     // then
-    assertThat(result.categoryId()).isEqualTo(category.getCategoryId());
+    assertThat(result.categoryId()).isEqualTo(category.getId());
     assertThat(result.name()).isEqualTo(category.getName());
     assertThat(result.message()).isEqualTo(CommonConstants.DELETE_SUCCESS);
 
     // 삭제 후 DB에 존재하지 않아야 함
-    assertThat(categoryRepository.findById(category.getCategoryId())).isEmpty();
+    assertThat(categoryRepository.findById(category.getId())).isEmpty();
   }
 
   @Test
@@ -69,7 +68,7 @@ class CategoryDeleteTest extends AuthenticatedServiceTestBase {
     );
 
     // when + then
-    assertThatThrownBy(() -> categoryService.deleteCategory(category.getCategoryId()))
+    assertThatThrownBy(() -> categoryService.deleteCategory(category.getId()))
         .isInstanceOf(ConflictException.class)
         .hasMessageContaining(CategoryConstants.CHILDREN_EXIST);
   }

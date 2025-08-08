@@ -20,7 +20,7 @@ public class ProductMapper {
   public static ProductResponse toResponse(Product product, int quantity, String imageUrl) {
     return new ProductResponse(
         product.getId(),
-        product.getCategory().getCategoryId(),
+        product.getCategory().getId(),
         product.getName(),
         product.getDescription(),
         product.getImageKey(),

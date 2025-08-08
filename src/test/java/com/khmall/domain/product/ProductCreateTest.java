@@ -38,7 +38,7 @@ class ProductCreateTest extends AuthenticatedServiceTestBase {
     Category category = TestEntityFactory.createCategory(categoryRepository, null, "테스트카테고리", 0);
 
     ProductCreateRequest request = new ProductCreateRequest(
-        category.getCategoryId(),
+        category.getId(),
         "테스트상품",
         "테스트 설명",
         "product/2025/08/demo.jpg",
@@ -52,7 +52,7 @@ class ProductCreateTest extends AuthenticatedServiceTestBase {
 
     // Then
     assertThat(resp.id()).isNotNull();
-    assertThat(resp.categoryId()).isEqualTo(category.getCategoryId());
+    assertThat(resp.categoryId()).isEqualTo(category.getId());
     assertThat(resp.name()).isEqualTo("테스트상품");
     assertThat(resp.price()).isEqualTo(10_000L);
     assertThat(resp.quantity()).isEqualTo(5);

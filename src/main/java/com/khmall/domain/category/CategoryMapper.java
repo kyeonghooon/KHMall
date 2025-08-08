@@ -14,8 +14,8 @@ public class CategoryMapper {
 
   public static CategoryResponse toResponse(Category category) {
     return new CategoryResponse(
-        category.getCategoryId(),
-        category.getParent() != null ? category.getParent().getCategoryId() : null,
+        category.getId(),
+        category.getParent() != null ? category.getParent().getId() : null,
         category.getName(),
         category.getSortOrder()
     );
@@ -23,7 +23,7 @@ public class CategoryMapper {
 
   public static CategoryTreeResponse toTreeResponse(Category category) {
     return new CategoryTreeResponse(
-        category.getCategoryId(),
+        category.getId(),
         category.getName(),
         category.getSortOrder(),
         new ArrayList<>()

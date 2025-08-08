@@ -14,7 +14,6 @@ import com.khmall.exception.custom.NotFoundException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -106,7 +105,7 @@ public class CategoryService {
 
     // 로그용 리턴값
     return new CategoryDeleteResult(
-        category.getCategoryId(),
+        category.getId(),
         category.getName()
     );
   }
@@ -122,17 +121,17 @@ public class CategoryService {
     // id -> DTO 매핑
     Map<Long, CategoryTreeResponse> dtoMap = categories.stream()
         .collect(Collectors.toMap(
-            Category::getCategoryId,
+            Category::getId,
             CategoryMapper::toTreeResponse
         ));
 
     // tree 구조로 변환
     categories.forEach(category -> {
       if (category.getParent() != null) {
-        Long parentId = category.getParent().getCategoryId();
+        Long parentId = category.getParent().getId();
         CategoryTreeResponse parentDto = dtoMap.get(parentId);
         if (parentDto != null) {
-          parentDto.children().add(dtoMap.get(category.getCategoryId()));
+          parentDto.children().add(dtoMap.get(category.getId()));
         }
       }
     });
@@ -140,7 +139,7 @@ public class CategoryService {
     // 최상위 카테고리만 추출
     List<CategoryTreeResponse> roots = categories.stream()
         .filter(c -> c.getParent() == null)
-        .map(c -> dtoMap.get(c.getCategoryId()))
+        .map(c -> dtoMap.get(c.getId()))
         .collect(Collectors.toList());
 
     // 자식 카테고리 정렬
@@ -207,7 +206,7 @@ public class CategoryService {
       category.setParent(null);
     }
     // 자기 참조 방지
-    else if (parentId.equals(category.getCategoryId())) {
+    else if (parentId.equals(category.getId())) {
       throw new BadRequestException(CategoryConstants.SELF_REFERENCE_MESSAGE);
     }
     // 상위 카테고리를 변경 하려는 경우
