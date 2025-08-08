@@ -47,6 +47,7 @@ dependencies {
 
     // json binding
     implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 
     // Development and Testing
     developmentOnly 'org.springframework.boot:spring-boot-devtools'

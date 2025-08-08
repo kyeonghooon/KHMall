@@ -141,7 +141,7 @@ public class CategoryService {
     List<CategoryTreeResponse> roots = categories.stream()
         .filter(c -> c.getParent() == null)
         .map(c -> dtoMap.get(c.getCategoryId()))
-        .toList();
+        .collect(Collectors.toList());
 
     // 자식 카테고리 정렬
     sortChildrenRecursively(roots);
