@@ -4,8 +4,10 @@ import com.khmall.common.constants.ProductConstants;
 import com.khmall.domain.product.ProductStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
+import lombok.RequiredArgsConstructor;
 
 public record ProductCreateRequest(
     @NotNull(message = ProductConstants.CATEGORY_NOT_BLANK_MESSAGE)
@@ -18,6 +20,10 @@ public record ProductCreateRequest(
     String description,
 
     @NotBlank(message = ProductConstants.IMAGE_KEY_NOT_BLANK_MESSAGE)
+    @Pattern(
+        regexp = ProductConstants.IMAGE_KEY_PATTERN,
+        message = ProductConstants.IMAGE_KEY_PATTERN_MESSAGE
+    )
     String imageKey,
 
     @NotNull(message = ProductConstants.PRICE_NOT_BLANK_MESSAGE)

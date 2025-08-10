@@ -95,7 +95,7 @@ public class CategoryService {
         .orElseThrow(() -> new NotFoundException(CategoryConstants.NOT_FOUND));
 
     // 하위 카테고리 존재 검사
-    if (categoryRepository.existsByParent_CategoryId(id)) {
+    if (categoryRepository.existsByParent_Id(id)) {
       throw new ConflictException(CategoryConstants.CHILDREN_EXIST);
     }
 
