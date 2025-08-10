@@ -7,6 +7,7 @@ import com.khmall.domain.category.dto.CategoryDeleteResult;
 import com.khmall.domain.category.dto.CategoryResponse;
 import com.khmall.domain.category.dto.CategoryTreeResponse;
 import com.khmall.domain.category.dto.CategoryUpdateRequest;
+import com.khmall.domain.product.ProductRepository;
 import com.khmall.exception.custom.BadRequestException;
 import com.khmall.exception.custom.ConflictException;
 import com.khmall.exception.custom.DuplicateException;
@@ -26,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CategoryService {
 
   private final CategoryRepository categoryRepository;
+  private final ProductRepository productRepository;
   private final CategoryValidator categoryValidator;
 
   /**
@@ -99,7 +101,10 @@ public class CategoryService {
       throw new ConflictException(CategoryConstants.CHILDREN_EXIST);
     }
 
-    // TODO 연결된 상품 존재 검사
+    // 연결된 상품 존재 검사
+    if (productRepository.existsByCategoryId(id)) {
+      throw new ConflictException(CategoryConstants.PRODUCT_EXIST);
+    }
 
     categoryRepository.deleteById(id);
 
