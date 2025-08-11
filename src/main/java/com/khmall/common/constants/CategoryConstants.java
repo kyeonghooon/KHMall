@@ -21,5 +21,7 @@ public class CategoryConstants {
   public static final String PARENT_NOT_FOUND = "상위 카테고리가 존재하지 않습니다.";
   public static final String NOT_FOUND = "카테고리가 존재하지 않습니다.";
   public static final String NAME_DUPLICATE = "이미 존재하는 이름의 카테고리입니다.";
+  public static final String PRODUCT_EXIST = "해당 카테고리에 상품이 존재하여 삭제할 수 없습니다.";
   public static final String DEPTH_EXCEEDED = "카테고리의 최대 깊이를 초과했습니다. (최대 " + DEPTH_MAX + "단계)";
+  public static final String CHILDREN_EXIST = "카테고리에 하위 카테고리가 있어 삭제할 수 없습니다.";
 }

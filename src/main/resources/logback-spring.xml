@@ -25,7 +25,22 @@
     <appender-ref ref="AUDIT_FILE"/>
   </logger>
 
+  <!-- 에러 메시지만 남기는 전용 appender -->
+  <appender name="ERROR_ONLY_FILE" class="ch.qos.logback.core.FileAppender">
+    <file>logs/error_message_only.log</file>
+    <append>true</append>
+    <encoder>
+      <pattern>${CONSOLE_PATTERN}</pattern>
+    </encoder>
+    <filter class="ch.qos.logback.classic.filter.LevelFilter">
+      <level>ERROR</level>
+      <onMatch>ACCEPT</onMatch>
+      <onMismatch>DENY</onMismatch>
+    </filter>
+  </appender>
+
   <root level="INFO">
     <appender-ref ref="STDOUT"/>
+    <appender-ref ref="ERROR_ONLY_FILE"/>
   </root>
 </configuration>

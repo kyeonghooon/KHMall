@@ -2,11 +2,17 @@ package com.khmall.api;
 
 import com.khmall.domain.category.CategoryService;
 import com.khmall.domain.category.dto.CategoryCreateRequest;
+import com.khmall.domain.category.dto.CategoryDeleteResult;
 import com.khmall.domain.category.dto.CategoryResponse;
+import com.khmall.domain.category.dto.CategoryTreeResponse;
 import com.khmall.domain.category.dto.CategoryUpdateRequest;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,15 +29,38 @@ public class CategoryController {
 
   @PreAuthorize("hasRole('ADMIN')")
   @PostMapping
-  public CategoryResponse createCategory(@Valid @RequestBody CategoryCreateRequest request) {
-    return categoryService.createCategory(request);
+  public ResponseEntity<CategoryResponse> createCategory(@Valid @RequestBody CategoryCreateRequest request) {
+    return ResponseEntity.ok(categoryService.createCategory(request));
   }
 
   @PreAuthorize("hasRole('ADMIN')")
   @PatchMapping("/{categoryId}")
-  public CategoryResponse updateCategory(
+  public ResponseEntity<CategoryResponse> updateCategory(
       @PathVariable Long categoryId,
       @RequestBody CategoryUpdateRequest request) {
-    return categoryService.updateCategory(categoryId, request);
+    return ResponseEntity.ok(categoryService.updateCategory(categoryId, request));
   }
+
+  @PreAuthorize("hasRole('ADMIN')")
+  @DeleteMapping("/{categoryId}")
+  public ResponseEntity<CategoryDeleteResult> deleteCategory(@PathVariable Long categoryId) {
+    return ResponseEntity.ok(categoryService.deleteCategory(categoryId));
+  }
+
+  @GetMapping
+  public List<CategoryResponse> getCategoryFlatList() {
+    return categoryService.getCategoryFlatList();
+  }
+
+  @GetMapping("/tree")
+  public ResponseEntity<List<CategoryTreeResponse>> getCategoryTree() {
+    return ResponseEntity.ok(categoryService.getCategoryTree());
+  }
+
+  @GetMapping("/{id}")
+  public ResponseEntity<CategoryResponse> getCategory(@PathVariable Long id) {
+    return ResponseEntity.ok(categoryService.getCategory(id));
+  }
+
+
 }

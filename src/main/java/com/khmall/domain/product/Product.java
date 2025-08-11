@@ -1,9 +1,11 @@
-package com.khmall.domain.category;
+package com.khmall.domain.product;
 
 import com.khmall.common.BaseAuditEntity;
-import com.khmall.common.constants.CategoryConstants;
+import com.khmall.domain.category.Category;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -23,22 +25,31 @@ import lombok.Setter;
 @Setter
 @Builder
 @Entity
-@Table(name = "category")
-public class Category extends BaseAuditEntity {
+@Table(name = "product")
+public class Product extends BaseAuditEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "category_id")
+  @Column(name = "product_id")
   private Long id;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "parent_id")
-  private Category parent;
+  @JoinColumn(name = "category_id", nullable = false)
+  private Category category;
 
-  @Column(nullable = false, length = 100)
+  @Column(nullable = false, length = 150)
   private String name;
 
+  @Column(columnDefinition = "TEXT")
+  private String description;
+
+  @Column(name = "image", nullable = false, length = 512)
+  private String imageKey;
+
   @Column(nullable = false)
-  @Builder.Default
-  private int sortOrder = CategoryConstants.SORT_ORDER_MIN;
+  private Long price;
+
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false, length = 10)
+  private ProductStatus status = ProductStatus.ON_SALE;
 }

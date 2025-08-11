@@ -7,3 +7,10 @@ jwt:
 
 server:
   port: 8080
+
+storage:
+  s3:
+    bucket: khmall-dev-assets-apne2
+    region: ap-northeast-2
+    base-url: https://khmall-dev-assets-apne2.s3.ap-northeast-2.amazonaws.com
+    prefix: products

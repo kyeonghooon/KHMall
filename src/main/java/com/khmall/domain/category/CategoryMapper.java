@@ -4,6 +4,8 @@ import static com.khmall.common.constants.CategoryConstants.SORT_ORDER_MIN;
 
 import com.khmall.domain.category.dto.CategoryCreateRequest;
 import com.khmall.domain.category.dto.CategoryResponse;
+import com.khmall.domain.category.dto.CategoryTreeResponse;
+import java.util.ArrayList;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -12,10 +14,19 @@ public class CategoryMapper {
 
   public static CategoryResponse toResponse(Category category) {
     return new CategoryResponse(
-        category.getCategoryId(),
-        category.getParent() != null ? category.getParent().getCategoryId() : null,
+        category.getId(),
+        category.getParent() != null ? category.getParent().getId() : null,
         category.getName(),
         category.getSortOrder()
+    );
+  }
+
+  public static CategoryTreeResponse toTreeResponse(Category category) {
+    return new CategoryTreeResponse(
+        category.getId(),
+        category.getName(),
+        category.getSortOrder(),
+        new ArrayList<>()
     );
   }
 

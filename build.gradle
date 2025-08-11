@@ -47,6 +47,11 @@ dependencies {
 
     // json binding
     implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+
+    // AWS S3
+    implementation platform('software.amazon.awssdk:bom:2.25.66')
+    implementation 'software.amazon.awssdk:s3'
 
     // Development and Testing
     developmentOnly 'org.springframework.boot:spring-boot-devtools'

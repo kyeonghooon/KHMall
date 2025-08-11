@@ -31,7 +31,7 @@ public abstract class AuthenticatedServiceTestBase extends TestBase {
         .orElseGet(
             () -> TestEntityFactory.createAdmin(userRepository, passwordEncoder, ADMIN_USERNAME, ADMIN_PASS,
                 ADMIN_NAME));
-    adminId = admin.getUserId();
+    adminId = admin.getId();
     CustomUserDetails userDetails = new CustomUserDetails(
         adminId, admin.getUsername(), admin.getPassword(), admin.getRole().name()
     );
