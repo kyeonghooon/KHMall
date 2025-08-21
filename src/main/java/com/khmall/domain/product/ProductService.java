@@ -6,18 +6,25 @@ import com.khmall.common.constants.InventoryConstants;
 import com.khmall.common.constants.ProductConstants;
 import com.khmall.config.S3Props;
 import com.khmall.domain.category.Category;
+import com.khmall.domain.category.CategoryPathService;
 import com.khmall.domain.category.CategoryRepository;
 import com.khmall.domain.inventory.Inventory;
 import com.khmall.domain.inventory.InventoryLogRepository;
 import com.khmall.domain.inventory.InventoryMapper;
 import com.khmall.domain.inventory.InventoryRepository;
+import com.khmall.domain.product.dto.AdminProductDetailResponse;
+import com.khmall.domain.product.dto.AdminProductListView;
 import com.khmall.domain.product.dto.ProductCreateRequest;
 import com.khmall.domain.product.dto.ProductResponse;
 import com.khmall.domain.product.dto.ProductUpdateRequest;
 import com.khmall.exception.custom.BadRequestException;
 import com.khmall.exception.custom.NotFoundException;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +46,8 @@ public class ProductService {
   private final CategoryRepository categoryRepository;
   private final InventoryRepository inventoryRepository;
   private final InventoryLogRepository inventoryLogRepository;
+
+  private final CategoryPathService categoryPathService;
 
   /**
    * 상품 생성
@@ -70,6 +79,13 @@ public class ProductService {
     );
   }
 
+  /**
+   * 상품 수정
+   *
+   * @param productId 상품 ID
+   * @param request 상품 수정 요청
+   * @return 수정된 상품 정보
+   */
   @Transactional
   public ProductResponse updateProduct(Long productId, ProductUpdateRequest request) {
     Product product = productRepository.findById(productId)
@@ -90,6 +106,44 @@ public class ProductService {
     return ProductMapper.toResponse(
         product, inventory.getQuantity(), imageUrl
     );
+  }
+
+  /**
+   * 관리자 상품 상세 조회
+   *
+   * @param productId 상품 ID
+   * @return 관리자 상품 상세 정보
+   */
+  public AdminProductDetailResponse getAdminProductDetail(Long productId) {
+    AdminProductDetailResponse dto = productRepository.findAdminProductDetailById(productId)
+        .orElseThrow(() -> new NotFoundException(ProductConstants.NOT_FOUND));
+
+    String imageUrl = props.getBaseUrl() + dto.imageKey();
+    String categoryPath = categoryPathService.buildPath(dto.categoryId());
+    return dto.withCategoryPathAndImageUrl(categoryPath, imageUrl);
+  }
+
+  /**
+   * 관리자 상품 목록 조회
+   *
+   * @param keyword 검색어 (상품명)
+   * @param categoryId 카테고리 ID (null이면 전체)
+   * @param status 상품 상태 (null이면 전체)
+   * @param pageable 페이징 정보
+   * @return 관리자 상품 목록 페이지
+   */
+  public Page<AdminProductListView> getAdminProductList(
+      String keyword, Long categoryId, ProductStatus status, Pageable pageable) {
+    Page<AdminProductListView> page = productRepository.findAdminProductList(
+        keyword, categoryId, status, pageable
+    );
+
+    // 카테고리 경로를 서비스 계층에서 주입
+    Map<Long, String> categoryPaths = categoryPathService.buildPathsFor(
+        page.getContent().stream().map(AdminProductListView::categoryId).collect(Collectors.toSet())
+    );
+
+    return page.map(product -> product.withCategoryPath(categoryPaths.get(product.categoryId())));
   }
 
   public void verificationImageKey(String imageKey) {

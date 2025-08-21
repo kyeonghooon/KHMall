@@ -102,7 +102,7 @@ public class CategoryService {
     }
 
     // 연결된 상품 존재 검사
-    if (productRepository.existsByCategoryId(id)) {
+    if (productRepository.existsByCategory_Id(id)) {
       throw new ConflictException(CategoryConstants.PRODUCT_EXIST);
     }
 
