@@ -27,5 +27,6 @@ public class ProductConstants {
   public static final String IMAGE_KEY_PATTERN_MESSAGE = "상품 이미지 키 형식이 올바르지 않습니다. (예: products/2023/01/uuid.jpg)";
 
   // Error messages
-
+  public static final String NOT_FOUND = "상품을 찾을 수 없습니다.";
+  public static final String NOT_SALE = "구매 가능한 상품이 아닙니다.";
 }
