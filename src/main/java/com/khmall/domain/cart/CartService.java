@@ -91,7 +91,7 @@ public class CartService {
     if (item.getProduct().getStatus() == ProductStatus.ON_SALE && request.quantity() > 0) {
       item.setQuantity(request.quantity());
     } else {
-      // 수량이 0 이하이거나 상품이 판매 중이 아닌 경우
+      // 수량이 0 이거나 상품이 판매 중이 아닌 경우
       cart.removeItem(item);
       cartItemRepository.delete(item);
     }

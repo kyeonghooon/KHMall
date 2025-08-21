@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +22,8 @@ public class CategoryPathService {
 
   private final CategoryRepository categoryRepository;
 
+  // TODO : 캐싱 적용
+
   /**
    * 요청된 카테고리 ID의 경로를 반환합니다.
    *
@@ -30,7 +31,9 @@ public class CategoryPathService {
    * @return 카테고리 경로 문자열
    */
   public String buildPath(Long categoryId) {
-    if (categoryId == null) return null;
+    if (categoryId == null) {
+      return null;
+    }
     List<Flat> flats = categoryRepository.findAllFlat();
     Map<Long, Flat> all = flats.stream()
         .collect(Collectors.toMap(Flat::getId, f -> f));
@@ -44,19 +47,22 @@ public class CategoryPathService {
    * @return 카테고리 ID와 해당 경로의 맵
    */
   public Map<Long, String> buildPathsFor(Set<Long> categoryIds) {
-    if (categoryIds == null || categoryIds.isEmpty()) return Collections.emptyMap();
+    if (categoryIds == null || categoryIds.isEmpty()) {
+      return Collections.emptyMap();
+    }
 
     List<Flat> flats = categoryRepository.findAllFlat();
     Map<Long, Flat> all = flats.stream()
         .collect(Collectors.toMap(Flat::getId, f -> f));
 
     Map<Long, String> memo = new HashMap<>();
-    for (Long id : categoryIds) pathOf(id, all, memo);
+    for (Long id : categoryIds) {
+      pathOf(id, all, memo);
+    }
 
     // 요청된 것만 반환
-    Map<Long, String> result = new HashMap<>();
-    for (Long id : categoryIds) result.put(id, memo.get(id));
-    return result;
+    return categoryIds.stream()
+        .collect(Collectors.toMap(id -> id, memo::get));
   }
 
   /**
@@ -68,8 +74,12 @@ public class CategoryPathService {
    * @return 카테고리 경로 문자열
    */
   private String pathOf(Long id, Map<Long, Flat> all, Map<Long, String> memo) {
-    if (id == null) return null;
-    if (memo.containsKey(id)) return memo.get(id);
+    if (id == null) {
+      return null;
+    }
+    if (memo.containsKey(id)) {
+      return memo.get(id);
+    }
 
     Flat cur = all.get(id);
     if (cur == null) {
@@ -90,7 +100,9 @@ public class CategoryPathService {
    * @return 하위 카테고리 ID들의 집합
    */
   public Set<Long> collectDescendantIds(Long rootCategoryId) {
-    if (rootCategoryId == null) return Collections.emptySet();
+    if (rootCategoryId == null) {
+      return Collections.emptySet();
+    }
 
     List<CategoryRepository.Flat> flats = categoryRepository.findAllFlat();
 
@@ -111,9 +123,13 @@ public class CategoryPathService {
     while (!stack.isEmpty()) {
       Long cur = stack.pop();
       List<Long> kids = children.get(cur);
-      if (kids == null) continue;
+      if (kids == null) {
+        continue;
+      }
       for (Long kid : kids) {
-        if (result.add(kid)) stack.push(kid);
+        if (result.add(kid)) {
+          stack.push(kid);
+        }
       }
     }
     return result;
