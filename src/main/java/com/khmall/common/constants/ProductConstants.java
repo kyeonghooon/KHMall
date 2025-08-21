@@ -28,4 +28,5 @@ public class ProductConstants {
 
   // Error messages
   public static final String NOT_FOUND = "상품을 찾을 수 없습니다.";
+  public static final String NOT_SALE = "구매 가능한 상품이 아닙니다.";
 }
