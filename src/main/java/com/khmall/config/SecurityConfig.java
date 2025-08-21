@@ -5,6 +5,7 @@ import com.khmall.security.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -40,6 +41,12 @@ public class SecurityConfig {
                 // Swagger 관련 경로 인증 없이 접근 허용
                 "/v3/api-docs/**",
                 "/swagger-ui/**"
+            ).permitAll()
+            .requestMatchers(
+                HttpMethod.GET,
+                // 상품 조회, 카테고리 조회 등 GET 요청은 인증 없이 접근
+                "/api/products/**",
+                "/api/categories/**"
             ).permitAll()
             // 나머지 모든 요청은 인증 필요(JWT 없으면 401)
             .anyRequest().authenticated())

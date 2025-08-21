@@ -1,8 +1,13 @@
 package com.khmall.domain.category;
 
 import com.khmall.domain.category.CategoryRepository.Flat;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -76,5 +81,41 @@ public class CategoryPathService {
     String path = (parentPath == null) ? cur.getName() : parentPath + " > " + cur.getName();
     memo.put(id, path);
     return path;
+  }
+
+  /**
+   * 주어진 카테고리 ID의 모든 하위 카테고리 ID를 수집합니다.
+   *
+   * @param rootCategoryId 루트 카테고리 ID
+   * @return 하위 카테고리 ID들의 집합
+   */
+  public Set<Long> collectDescendantIds(Long rootCategoryId) {
+    if (rootCategoryId == null) return Collections.emptySet();
+
+    List<CategoryRepository.Flat> flats = categoryRepository.findAllFlat();
+
+    // parentId -> childrenIds 매핑
+    Map<Long, List<Long>> children = new HashMap<>();
+    for (CategoryRepository.Flat f : flats) {
+      Long pid = f.getParentId();
+      if (pid != null) {
+        children.computeIfAbsent(pid, k -> new ArrayList<>()).add(f.getId());
+      }
+    }
+
+    Set<Long> result = new LinkedHashSet<>();
+    Deque<Long> stack = new ArrayDeque<>();
+    stack.push(rootCategoryId);
+    result.add(rootCategoryId);
+
+    while (!stack.isEmpty()) {
+      Long cur = stack.pop();
+      List<Long> kids = children.get(cur);
+      if (kids == null) continue;
+      for (Long kid : kids) {
+        if (result.add(kid)) stack.push(kid);
+      }
+    }
+    return result;
   }
 }
