@@ -70,6 +70,7 @@ public class OrderCreateService {
 
     // 합계 확정
     order.recalcTotalPrice();
+    order.setStatus(OrderStatus.PAY_WAIT);
     orderRepository.save(order);
 
     // 결제 생성

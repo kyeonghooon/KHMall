@@ -1,5 +1,6 @@
 package com.khmall.api;
 
+import com.khmall.domain.order.OrderService;
 import com.khmall.domain.product.ProductService;
 import com.khmall.domain.product.ProductStatus;
 import com.khmall.domain.product.dto.AdminProductDetailResponse;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AdminController {
 
   private final ProductService productService;
+  private final OrderService orderService;
 
   /**
    * 관리자용 상품 상세 조회 API
@@ -56,5 +59,11 @@ public class AdminController {
     return ResponseEntity.ok(
         productService.getAdminProductList(keyword, categoryId, status, pageable)
     );
+  }
+
+  @PostMapping("/orders/{orderId}/deliver")
+  public ResponseEntity<Void> deliverOrder(@PathVariable Long orderId) {
+    orderService.deliver(orderId);
+    return ResponseEntity.ok().build();
   }
 }

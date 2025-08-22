@@ -63,20 +63,21 @@ public class Payment {
   @Column(name = "canceled_at")
   private LocalDateTime canceledAt;
 
-  // 관리자가 취소한 경우만 값 존재
+  // 본인 취소인지 관리자 취소인지 구분하기 위한 필드
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "canceled_by")
   private User canceledBy;
 
   // 상태 전이 편의 메서드
-  public void approve() {
+  public void approve(PaymentMethod method) {
     this.status = PaymentStatus.PAID;
+    this.method = method;
     this.approvedAt = LocalDateTime.now();
   }
 
-  public void cancel(User admin) {
+  public void cancel(User user) {
     this.status = PaymentStatus.CANCEL;
     this.canceledAt = LocalDateTime.now();
-    this.canceledBy = admin;
+    this.canceledBy = user;
   }
 }

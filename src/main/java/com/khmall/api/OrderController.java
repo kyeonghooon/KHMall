@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.Mapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,6 +49,43 @@ public class OrderController {
     return ResponseEntity
         .created(URI.create("/orders/" + resp.orderId()))
         .body(resp);
+  }
+
+  @PostMapping("/{orderId}/done")
+  @PreAuthorize("hasAnyRole('USER','ADMIN')")
+  public ResponseEntity<Void> complete(
+      @PathVariable Long orderId,
+      @AuthenticationPrincipal CustomUserDetails principal
+  ) {
+    boolean isAdmin = principal.getAuthorities().stream()
+        .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+    orderService.complete(orderId, principal.getUserId(), isAdmin);
+    return ResponseEntity.ok().build();
+  }
+
+  @PostMapping("/{orderId}/cancel")
+  @PreAuthorize("hasAnyRole('USER','ADMIN')")
+  public ResponseEntity<Void> cancelBeforePay(
+      @PathVariable Long orderId,
+      @AuthenticationPrincipal CustomUserDetails principal
+  ) {
+    boolean isAdmin = principal.getAuthorities().stream()
+        .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+    orderService.cancelBeforePay(orderId, principal.getUserId(), isAdmin);
+    return ResponseEntity.ok().build();
+  }
+
+  @PostMapping("/{orderId}/refund")
+  @PreAuthorize("hasAnyRole('USER','ADMIN')")
+  public ResponseEntity<Void> refundAfterPay(
+      @PathVariable Long orderId,
+      @AuthenticationPrincipal CustomUserDetails principal
+  ) {
+    boolean isAdmin = principal.getAuthorities().stream()
+        .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+    orderService.refundAfterPay(orderId, principal.getUserId(), isAdmin);
+    return ResponseEntity.ok().build();
   }
 
 }
