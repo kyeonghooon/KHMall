@@ -1,6 +1,7 @@
 package com.khmall.domain.order;
 
 import com.khmall.domain.order.dto.OrderCreateResponse;
+import com.khmall.domain.order.dto.OrderDetailResponse;
 import com.khmall.domain.payment.Payment;
 import com.khmall.domain.user.User;
 import java.util.List;
@@ -42,6 +43,21 @@ public class OrderMapper {
         oi.getPrice(),
         oi.getQuantity(),
         lineTotal
+    );
+  }
+
+  public static OrderDetailResponse toDetailResponse(Order order) {
+    List<OrderDetailResponse.Item> items = order.getItems().stream()
+        .map(i -> new OrderDetailResponse.Item(
+            i.getProduct().getId(),
+            i.getProduct().getName(),
+            i.getPrice(),
+            i.getQuantity(),
+            i.getProduct().getImageKey()
+        )).toList();
+
+    return new OrderDetailResponse(
+        order.getId(), order.getStatus(), order.getTotalPrice(), order.getCreatedAt(), items
     );
   }
 }

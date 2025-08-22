@@ -20,17 +20,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import jakarta.persistence.EntityManager;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
+@RequiredArgsConstructor
 public class ProductQueryRepositoryImpl implements ProductQueryRepository {
 
   private final JPAQueryFactory query;
-
-  public ProductQueryRepositoryImpl(EntityManager em) {
-    this.query = new JPAQueryFactory(em);
-  }
 
   private static Expression<String> NULL_STR() { return Expressions.nullExpression(String.class); }
   private static Expression<Boolean> FALSE() { return Expressions.constant(Boolean.FALSE); }

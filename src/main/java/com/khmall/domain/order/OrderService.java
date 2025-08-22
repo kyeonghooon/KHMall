@@ -14,6 +14,9 @@ import com.khmall.domain.inventory.InventoryRepository;
 import com.khmall.domain.order.dto.OrderCreateDirectRequest;
 import com.khmall.domain.order.dto.OrderCreateFromCartRequest;
 import com.khmall.domain.order.dto.OrderCreateResponse;
+import com.khmall.domain.order.dto.OrderDetailResponse;
+import com.khmall.domain.order.dto.OrderListView;
+import com.khmall.domain.order.dto.OrderSearchCond;
 import com.khmall.domain.payment.Payment;
 import com.khmall.domain.payment.PaymentRepository;
 import com.khmall.domain.payment.PaymentStatus;
@@ -25,6 +28,8 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +42,7 @@ public class OrderService {
   private final InventoryRepository inventoryRepository;
   private final InventoryLogRepository inventoryLogRepository;
   private final OrderRepository orderRepository;
+  private final OrderQueryRepository orderQueryRepository;
   private final OrderCreateService orderCreateService;
 
   /**
@@ -158,6 +164,13 @@ public class OrderService {
     finalizeCancel(order);
   }
 
+  /**
+   * 환불
+   *
+   * @param orderId 주문 ID
+   * @param userId  사용자 ID
+   * @param isAdmin 관리자 여부
+   */
   @Transactional
   public void refundAfterPay(Long orderId, Long userId, boolean isAdmin) {
 
@@ -181,6 +194,31 @@ public class OrderService {
 
     // 재고 복원 + 로그
     finalizeCancel(order);
+  }
+
+  @Transactional(readOnly = true)
+  public Page<OrderListView> getMyOrders(Long userId, OrderSearchCond cond, Pageable pageable) {
+    OrderSearchCond effective = new OrderSearchCond(cond.status(), cond.from(), cond.to(), userId);
+    return orderQueryRepository.search(effective, pageable);
+  }
+
+  @Transactional(readOnly = true)
+  public OrderDetailResponse getMyOrderDetail(Long orderId, Long userId) {
+    Order o = orderRepository.findDetailForUser(orderId, userId)
+        .orElseThrow(() -> new NotFoundException(OrderConstants.NOT_FOUND));
+    return OrderMapper.toDetailResponse(o);
+  }
+
+  @Transactional(readOnly = true)
+  public Page<OrderListView> getAdminOrders(OrderSearchCond cond, Pageable pageable) {
+    return orderQueryRepository.search(cond, pageable);
+  }
+
+  @Transactional(readOnly = true)
+  public OrderDetailResponse getAdminOrderDetail(Long orderId) {
+    Order o = orderRepository.findDetailForAdmin(orderId)
+        .orElseThrow(() -> new NotFoundException(OrderConstants.NOT_FOUND));
+    return OrderMapper.toDetailResponse(o);
   }
 
   private Order loadAuthorize(Long orderId, Long userId, boolean isAdmin) {

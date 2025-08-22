@@ -25,9 +25,25 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
   @Lock(LockModeType.PESSIMISTIC_WRITE)
   @Query("""
-    select o from Order o
-    join fetch o.user u
-    where o.id = :id
-  """)
+        select o from Order o
+        join fetch o.user u
+        where o.id = :id
+      """)
   Optional<Order> findByIdForUpdateWithUser(@Param("id") Long id);
+
+  @Query("""
+        select distinct o from Order o
+          join fetch o.items i
+          join fetch i.product p
+        where o.id = :id and o.user.id = :userId
+      """)
+  Optional<Order> findDetailForUser(@Param("id") Long id, @Param("userId") Long userId);
+
+  @Query("""
+        select distinct o from Order o
+          join fetch o.items i
+          join fetch i.product p
+        where o.id = :id
+      """)
+  Optional<Order> findDetailForAdmin(@Param("id") Long id);
 }
