@@ -1,18 +1,26 @@
 package com.khmall.api;
 
+import com.khmall.domain.order.OrderService;
+import com.khmall.domain.order.OrderStatus;
+import com.khmall.domain.order.dto.OrderDetailResponse;
+import com.khmall.domain.order.dto.OrderListView;
+import com.khmall.domain.order.dto.OrderSearchCond;
 import com.khmall.domain.product.ProductService;
 import com.khmall.domain.product.ProductStatus;
 import com.khmall.domain.product.dto.AdminProductDetailResponse;
 import com.khmall.domain.product.dto.AdminProductListView;
+import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AdminController {
 
   private final ProductService productService;
+  private final OrderService orderService;
 
   /**
    * 관리자용 상품 상세 조회 API
@@ -56,5 +65,30 @@ public class AdminController {
     return ResponseEntity.ok(
         productService.getAdminProductList(keyword, categoryId, status, pageable)
     );
+  }
+
+  @PostMapping("/orders/{orderId}/deliver")
+  public ResponseEntity<Void> deliverOrder(@PathVariable Long orderId) {
+    orderService.deliver(orderId);
+    return ResponseEntity.ok().build();
+  }
+
+  // 관리자: 주문 목록
+  @GetMapping("/orders")
+  public ResponseEntity<Page<OrderListView>> adminOrders(
+      @RequestParam(required = false) Long userId,
+      @RequestParam(required = false) OrderStatus status,
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+      @PageableDefault Pageable pageable
+  ) {
+    OrderSearchCond cond = new OrderSearchCond(status, from, to, userId);
+    return ResponseEntity.ok(orderService.getAdminOrders(cond, pageable));
+  }
+
+  // 관리자: 주문 상세
+  @GetMapping("/orders/{orderId}")
+  public ResponseEntity<OrderDetailResponse> adminOrderDetail(@PathVariable Long orderId) {
+    return ResponseEntity.ok(orderService.getAdminOrderDetail(orderId));
   }
 }

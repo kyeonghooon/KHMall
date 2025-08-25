@@ -43,7 +43,7 @@ public class ProductController {
   @PatchMapping("/{productId}")
   public ResponseEntity<ProductResponse> updateProduct(
       @PathVariable Long productId,
-      @RequestBody ProductUpdateRequest request) {
+      @Valid @RequestBody ProductUpdateRequest request) {
     ProductResponse resp = productService.updateProduct(productId, request);
     URI location = URI.create("/api/products/" + resp.id());
     return ResponseEntity.ok().location(location).body(resp);

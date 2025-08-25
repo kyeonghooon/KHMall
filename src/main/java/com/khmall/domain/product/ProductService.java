@@ -232,9 +232,6 @@ public class ProductService {
       return; // 카테고리 변경이 없는 경우
     }
     Long categoryId = request.categoryId().get();
-    if (categoryId == null) {
-      throw new BadRequestException(ProductConstants.CATEGORY_NOT_BLANK_MESSAGE);
-    }
     Category category = categoryRepository.findById(categoryId)
         .orElseThrow(() -> new NotFoundException(CategoryConstants.NOT_FOUND));
     product.setCategory(category);
@@ -245,7 +242,6 @@ public class ProductService {
       return; // 이름 변경이 없는 경우
     }
     String name = request.name().get();
-    ProductValidator.validateProductName(name);
     product.setName(name);
   }
 
@@ -263,12 +259,6 @@ public class ProductService {
       return; // 이미지 키 변경이 없는 경우
     }
     String newKey = request.imageKey().get();
-    if (newKey == null || newKey.isBlank()) {
-      throw new BadRequestException(ProductConstants.IMAGE_KEY_NOT_BLANK_MESSAGE);
-    }
-    if (!newKey.matches(ProductConstants.IMAGE_KEY_PATTERN)) {
-      throw new BadRequestException(ProductConstants.IMAGE_KEY_PATTERN_MESSAGE);
-    }
 
     // 기존 이미지 키와 동일한 경우 변경하지 않음
     String oldKey = product.getImageKey();
@@ -306,12 +296,6 @@ public class ProductService {
       return; // 가격 변경이 없는 경우
     }
     Long price = request.price().get();
-    if (price == null) {
-      throw new BadRequestException(ProductConstants.PRICE_NOT_BLANK_MESSAGE);
-    }
-    if (price < 0) {
-      throw new BadRequestException(ProductConstants.PRICE_MIN_MESSAGE);
-    }
     product.setPrice(price);
   }
 
@@ -320,9 +304,6 @@ public class ProductService {
       return; // 상태 변경이 없는 경우
     }
     ProductStatus status = request.status().get();
-    if (status == null) {
-      throw new BadRequestException(ProductConstants.STATUS_NOT_BLANK_MESSAGE);
-    }
     product.setStatus(status);
   }
 
@@ -331,12 +312,6 @@ public class ProductService {
       return; // 수량 변경이 없는 경우
     }
     Integer quantity = request.quantity().get();
-    if (quantity == null) {
-      throw new BadRequestException(ProductConstants.QUANTITY_NOT_BLANK_MESSAGE);
-    }
-    if (quantity < 0) {
-      throw new BadRequestException(ProductConstants.QUANTITY_MIN_MESSAGE);
-    }
 
     // 재고 업데이트
     Inventory inventory = inventoryRepository.findById(product.getId())
