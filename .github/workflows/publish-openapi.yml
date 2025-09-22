@@ -29,19 +29,35 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build (skip tests)
-        run: ./gradlew build -x test
+        run: ./gradlew bootJar -x test
 
-      - name: Start app (doc profile, background)
+      - name: Start app (doc profile, background) and wait for /v3/api-docs
         run: |
-          nohup ./gradlew bootRun -Pargs=--spring.profiles.active=doc >/dev/null 2>&1 &
-          for i in {1..40}; do
+          JAR_FILE=$(ls back/build/libs/*.jar | head -n 1)
+          echo "Using JAR: $JAR_FILE"
+          nohup java -jar "$JAR_FILE" --spring.profiles.active=doc > back/build/app.log 2>&1 &
+          APP_PID=$!
+          echo "App PID: $APP_PID"
+          
+          # 최대 180초 대기 (90 * 2s)
+          for i in {1..90}; do
             if curl -fsS http://localhost:8080/v3/api-docs >/dev/null; then
               echo "OpenAPI endpoint is up"
               break
             fi
+            # 프로세스 조기 종료 체크
+            if ! ps -p $APP_PID >/dev/null; then
+              echo "App process exited early. Recent logs:"
+              tail -n 200 back/build/app.log || true
+              exit 1
+            fi
             echo "Waiting for app... ($i)"
             sleep 2
           done
+          
+          # 마지막으로 로그 일부 출력(문제 파악 도움)
+          echo "==== Last 100 lines of app.log ===="
+          tail -n 100 back/build/app.log || true
 
       - name: Export OpenAPI JSON
         run: |
