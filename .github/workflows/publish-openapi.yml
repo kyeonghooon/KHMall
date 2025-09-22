@@ -32,6 +32,8 @@ jobs:
         run: ./gradlew bootJar -x test
 
       - name: Start app (doc profile, background) and wait for /v3/api-docs
+        env:
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}        
         run: |
           JAR_FILE=$(ls build/libs/*.jar | head -n 1)
           echo "Using JAR: $JAR_FILE"
